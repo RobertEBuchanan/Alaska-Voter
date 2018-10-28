@@ -2,31 +2,69 @@
     
     Description:    Procedure to bulk import dev of election voter extracts.
 
-    NOTE - SET NOT TO BUILD - MUST BE MANUALLY DEPLOYED
+    NOTE -->    SSDT didn't want to build and deploy this procedure.
+                I think this is becasue I am using a SQL 2017/2019 CTP feature (Format keyword)
+                Put bulk insert into dynamic SQL.
 
-    TODO -->    SSDT doesn't want to build and deploy this procedure.
-                I think this is becasue I am using SQL 2019 CTP features.
+    TODO -->    Better error handling... (Output param?)
+
+    Smoke Tests
+
+    DECLARE	@return_value int
+
+    EXEC	@return_value = [dbo].[ImportVoterCSV]
+		    @FileName = 'D:\Statewide voter list PUBLIC  9-4-18.csv'		
+
+    SELECT	'Return Value' = @return_value
+
+GO
 
 *******************************************************************************/
-CREATE OR ALTER PROCEDURE [dbo].[ImportVoterCSV]
-    @FileName VARCHAR(250),
-    @ExtractDate Date
+CREATE PROCEDURE [dbo].[ImportVoterCSV]
+    @FileName VARCHAR(250)
 AS
-    SELECT @FileName, @ExtractDate
-
     BEGIN TRY   
-        BULK INSERT [dbo].[RawStateVoterImport]
-        FROM 'D:\Statewide voter list PUBLIC  9-4-18.csv'
-        with  (
-	        FIRSTROW = 2,
-	        FIELDTERMINATOR = ',',
-	        ROWTERMINATOR = '\n',
-	        FIELDQUOTE = '\"'
-        );
+		IF (dbo.FileExists(@FileName) = 1)
+			BEGIN
+
+				--BULK INSERT [dbo].[RawStateVoterImport]
+				--FROM [@FileName] -- 'D:\Statewide voter list PUBLIC  9-4-18.csv'
+				--with  (
+				--	FORMAT ='CSV',
+				--	FIRSTROW = 2,
+				--	FIELDTERMINATOR = ',',
+				--	ROWTERMINATOR = '\n'
+				--);
+
+                -- 'D:\Statewide voter list PUBLIC  9-4-18.csv'
+                DECLARE @SQL_BULK VARCHAR(MAX) = 
+                        'BULK INSERT [dbo].[RawStateVoterImport]
+				            FROM ' + @FileName +                       
+				            'with  (
+					            FORMAT =''CSV'',
+					            FIRSTROW = 2,
+					            FIELDTERMINATOR = '','',
+					            ROWTERMINATOR = ''\n''
+				            );'
+                SELECT @SQL_BULK
+                -- EXEC (@SQL_BULK)
+			END
+		ELSE
+			BEGIN 
+				PRINT 'FILE NOT FOUND ' + @FileName
+				RETURN 2
+			END
     END TRY
     BEGIN CATCH
         PRINT 'BAD STUFF'
-        RETURN 1
+        SELECT  
+			ERROR_NUMBER() AS ErrorNumber  
+			,ERROR_SEVERITY() AS ErrorSeverity  
+			,ERROR_STATE() AS ErrorState  
+			,ERROR_PROCEDURE() AS ErrorProcedure  
+			,ERROR_LINE() AS ErrorLine  
+			,ERROR_MESSAGE() AS ErrorMessage;  
+		RETURN 1
     END CATCH
 
     
