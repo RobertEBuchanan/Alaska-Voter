@@ -11,5 +11,6 @@ AS
     -- Add/Update new voters
     -- Delete old voters
     -- 
+
     
 RETURN 0

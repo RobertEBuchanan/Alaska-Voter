@@ -1,9 +1,7 @@
 ﻿/******************************************************************************
     
-    Description:    Check if file exists.  For use prior to bulk loading data
-
-    "Stolen" from https://stackoverflow.com/questions/11740000/check-for-file-exists-or-not-in-sql-server
-
+    Description:    Turns voter history from Div of Elctions into more relational form
+    
 *******************************************************************************/
 CREATE view dbo.RawVotes
 as
@@ -11,122 +9,121 @@ with
 	raw_history as 
 	(
 		select 
-			[ascension_number]	 = [ASCENSION #], 
-			election			 = VH1
+			VoterId	 = [ASCENSION #], 
+			Election = VH1
 		from dbo.RawStateVoterImport
 	
 		union all
 	
 		select 
-			[ascension_number]	 = [ASCENSION #], 
-			election			 = VH2
+			VoterId	 = [ASCENSION #], 
+			Election = VH2
 		from dbo.RawStateVoterImport
 	
 		union all
 	
 		select 
-			[ascension_number]	 = [ASCENSION #], 
-			election			 = VH3
+			VoterId	 = [ASCENSION #], 
+			Election = VH3
 		from dbo.RawStateVoterImport
 	
 		union all
 	
 		select 
-			[ascension_number]	 = [ASCENSION #], 
-			election			 = VH4
+			VoterId	 = [ASCENSION #], 
+			Election = VH4
 		from dbo.RawStateVoterImport
 	
 		union all
 	
 		select 
-			[ascension_number]	 = [ASCENSION #], 
-			election			 = VH5
+			VoterId	 = [ASCENSION #], 
+			Election = VH5
 		from dbo.RawStateVoterImport
 	
 		union all
 	
 		select 
-			[ascension_number]	 = [ASCENSION #], 
-			election			 = VH6
+			VoterId	 = [ASCENSION #], 
+			Election = VH6
 		from dbo.RawStateVoterImport
 	
 		union all
 	
 		select 
-			[ascension_number]	 = [ASCENSION #], 
-			election			 = VH7
+			VoterId	 = [ASCENSION #], 
+			Election = VH7
 		from dbo.RawStateVoterImport
 	
 		union all
 	
 		select 
-			[ascension_number]	 = [ASCENSION #], 
-			election			 = VH8
+			VoterId	 = [ASCENSION #], 
+			Election = VH8
 		from dbo.RawStateVoterImport
 	
 		union all
 	
 		select 
-			[ascension_number]	 = [ASCENSION #], 
-			election			 = VH9
+			VoterId	 = [ASCENSION #], 
+			Election = VH9
 		from dbo.RawStateVoterImport
 	
 		union all
 	
 		select 
-			[ascension_number]	 = [ASCENSION #], 
-			election			 = VH10
+			VoterId	 = [ASCENSION #], 
+			Election = VH10
 		from dbo.RawStateVoterImport
 	
 		union all
 	
 		select 
-			[ascension_number]	 = [ASCENSION #], 
-			election			 = VH11
+			VoterId	 = [ASCENSION #], 
+			Election = VH11
 		from dbo.RawStateVoterImport
 	
 		union all
 	
 		select 
-			[ascension_number]	 = [ASCENSION #], 
-			election			 = VH12
+			VoterId	 = [ASCENSION #], 
+			Election = VH12
 		from dbo.RawStateVoterImport
 	
 		union all
 	
 		select 
-			[ascension_number]	 = [ASCENSION #], 
-			election			 = VH13
+			VoterId	 = [ASCENSION #], 
+			Election = VH13
 		from dbo.RawStateVoterImport
 	
 		union all
 	
 		select 
-			[ascension_number]	 = [ASCENSION #], 
-			election			 = VH14
+			VoterId	 = [ASCENSION #], 
+			Election = VH14
 		from dbo.RawStateVoterImport
 	
 		union all
 	
 		select 
-			[ascension_number]	 = [ASCENSION #], 
-			election			 = VH15
+			VoterId	 = [ASCENSION #], 
+			Election = VH15
 		from dbo.RawStateVoterImport
 	
 		union all
 	
 		select 
-			[ascension_number]	 = [ASCENSION #], 
-			election			 = VH16
+			VoterId	 = [ASCENSION #], 
+			Election = VH16
 		from dbo.RawStateVoterImport
 	)
 	select 
 		* ,
-		[vote_year]		= cast(substring(election,1,2) as int),
-		[vote_election]	= rtrim(substring(election,3,4)),	
-		[vote_method]	= substring(reverse(election),1,2)
+		[VoteYear]		= cast(substring(election,1,2) as int),
+		[VoteElection]	= rtrim(substring(election,3,4)),	
+		[VoteMethod]	= substring(reverse(election),1,2)
 	from raw_history
-	where election is not null
-
+	where Election is not null
 
 GO

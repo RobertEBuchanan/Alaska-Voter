@@ -74,6 +74,7 @@
     <Build Include="ScalarFunctions\FileExists.sql" />
     <Build Include="Views\RawVotes.sql" />
     <Build Include="AddSchemas.sql" />
+    <Build Include="Procedures\ParseRawToElections.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="Voter.DB.refactorlog" />

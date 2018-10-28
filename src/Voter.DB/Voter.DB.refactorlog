@@ -98,4 +98,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="ElectionId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="157bc97f-a948-4ecf-97e4-90054c5af004" ChangeDateTime="10/28/2018 18:51:49">
+    <Property Name="ElementName" Value="[dbo].[Election].[Year]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Election]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="VoteYear" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a9bacedc-a95b-4e5c-ab6a-45b1a4dc327b" ChangeDateTime="10/28/2018 18:51:54">
+    <Property Name="ElementName" Value="[dbo].[Election].[Location]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Election]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="VoteElection" />
+  </Operation>
 </Operations>
