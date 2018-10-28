@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[Voter]
 (
-	[VoterId] INT NOT NULL,
+	[VoterId] INT NOT NULL PRIMARY KEY CLUSTERED ,
     [UN] [nvarchar](max) NULL,
 	[PARTY] [nvarchar](max) NULL,
 	[D/P] [nvarchar](max) NULL,
@@ -21,7 +21,9 @@
 	[MailingState] [nvarchar](max) NULL,
 	[MailingZip] [nvarchar](max) NULL,
 	[MailingCountry] [nvarchar](max) NULL,
-	[Gender] [nvarchar](max) NULL, 
-    [FOO] NCHAR(10) NULL, 
-    CONSTRAINT [PK_Voter] PRIMARY KEY ([VoterId]),
-)
+	[Gender] [nvarchar](max) NULL,
+    [ValidFrom] datetime2 (2) GENERATED ALWAYS AS ROW START,  
+    [ValidTo] datetime2 (2) GENERATED ALWAYS AS ROW END,  
+    PERIOD FOR SYSTEM_TIME (ValidFrom, ValidTo)
+) 
+WITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = dbo.Voter_Temporal)); 

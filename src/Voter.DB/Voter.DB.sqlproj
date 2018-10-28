@@ -61,16 +61,19 @@
     <Folder Include="Procedures" />
     <Folder Include="TestData" />
     <Folder Include="ScalarFunctions" />
+    <Folder Include="Views" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\DataImports.sql" />
     <Build Include="Tables\RawStateVoterImport.sql" />
     <Build Include="Tables\Voter.sql" />
     <Build Include="Tables\Election.sql" />
-    <Build Include="Tables\VoterHistory.sql" />
+    <Build Include="Tables\VoterElection.sql" />
     <Build Include="Procedures\ImportVoterCSV.sql" />
     <Build Include="Procedures\ProcessVoterDataImport.sql" />
     <Build Include="ScalarFunctions\FileExists.sql" />
+    <Build Include="Views\RawVotes.sql" />
+    <Build Include="AddSchemas.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="Voter.DB.refactorlog" />
