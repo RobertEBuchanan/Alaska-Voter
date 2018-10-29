@@ -4,7 +4,7 @@
 
 *******************************************************************************/
 CREATE PROCEDURE [dbo].[ParseRawToElections]
-   @SourceDate AS DATETIME2
+   @FileDate AS DATETIME2
 AS
     ;WITH 
     new_elections_cte AS
@@ -26,7 +26,7 @@ AS
             VoteYear,
             VoteElection,
 			NULL,
-            @SourceDate
+            @FileDate
         FROM new_elections_cte
 
 RETURN 0

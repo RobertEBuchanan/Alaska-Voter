@@ -26,28 +26,20 @@ AS
     BEGIN TRY   
 		IF (dbo.FileExists(@FileName) = 1)
 			BEGIN
-
-				--BULK INSERT [dbo].[RawStateVoterImport]
-				--FROM [@FileName] -- 'D:\Statewide voter list PUBLIC  9-4-18.csv'
-				--with  (
-				--	FORMAT ='CSV',
-				--	FIRSTROW = 2,
-				--	FIELDTERMINATOR = ',',
-				--	ROWTERMINATOR = '\n'
-				--);
+                TRUNCATE TABLE [dbo].[RawStateVoterImport]
 
                 -- 'D:\Statewide voter list PUBLIC  9-4-18.csv'
                 DECLARE @SQL_BULK VARCHAR(MAX) = 
                         'BULK INSERT [dbo].[RawStateVoterImport]
-				            FROM ' + @FileName +                       
-				            'with  (
+				            FROM ''' + @FileName + '''                      
+				            with (
 					            FORMAT =''CSV'',
 					            FIRSTROW = 2,
 					            FIELDTERMINATOR = '','',
 					            ROWTERMINATOR = ''\n''
 				            );'
-                SELECT @SQL_BULK
-                -- EXEC (@SQL_BULK)
+              
+                 EXEC (@SQL_BULK)
 			END
 		ELSE
 			BEGIN 
