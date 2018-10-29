@@ -1,5 +1,5 @@
 # Alaska-Voter
-The purpose of this project is to make working with voter data easer and more efficient. I personally get at least a few requests for help every year.  Manually loading and cleaning the voter roles is a pain.
+The purpose of this project is to make working with voter data easer and more efficient. Manually loading and cleaning the voter data is a pain.  
 
 # Techninology
 - Database 
