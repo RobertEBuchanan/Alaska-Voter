@@ -11,7 +11,7 @@ The purpose of this project is to make working with voter data easer and more ef
     Why? The (very nice) EF Reverse POCO Generator (Simon Hughes) still doesn't support EF core. 
 - Admin App - Probably just a tool for importing data.  This may actually be just a glorified "open-file" dialog. 
   - Probably a WinForms (easy) 
-  - Maybe just a PowerShell Script   
+  - Not using EF6 code for this.  Not worth trouble.  It looks like it won't actually do much data access. (Just a call to a proc to import voter data)
 - Web Application:
   - Would allow self service and would scale to more people.  The major parties have their own databases.  Buiness can afford to buy lists.  Many folks can't afford good data.
   - MVC?
