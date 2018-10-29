@@ -71,9 +71,10 @@
             // 
             // dtpFileCreated
             // 
-            this.dtpFileCreated.Location = new System.Drawing.Point(84, 55);
+            this.dtpFileCreated.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dtpFileCreated.Location = new System.Drawing.Point(84, 54);
             this.dtpFileCreated.Name = "dtpFileCreated";
-            this.dtpFileCreated.Size = new System.Drawing.Size(166, 20);
+            this.dtpFileCreated.Size = new System.Drawing.Size(106, 20);
             this.dtpFileCreated.TabIndex = 3;
             // 
             // lblExtractFile
