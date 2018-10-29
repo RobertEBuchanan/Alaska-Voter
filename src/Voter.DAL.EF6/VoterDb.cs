@@ -9,7 +9,7 @@
 // The following connection settings were used to generate this file:
 //     Configuration file:     "Voter.DAL.EF6\App.config"
 //     Connection String Name: "VoterDb"
-//     Connection String:      "Data Source=ALU\SQL2019_CTP;Initial Catalog=VoterData;Integrated Security=True"
+//     Connection String:      "Data Source=ALU\SQL2019_CTP;Initial Catalog=Voter.DB;Integrated Security=True"
 // ------------------------------------------------------------------------------------------------
 // Database Edition        : Developer Edition (64-bit)
 // Database Engine Edition : Enterprise
@@ -37,6 +37,12 @@ namespace Voter.DAL.EF6
 
     public interface IVoterDbContext : System.IDisposable
     {
+        System.Data.Entity.DbSet<DataImport> DataImports { get; set; } // DataImports
+        System.Data.Entity.DbSet<Election> Elections { get; set; } // Election
+        System.Data.Entity.DbSet<EmployeeHistory> EmployeeHistories { get; set; } // EmployeeHistory
+        System.Data.Entity.DbSet<Voter> Voters { get; set; } // Voter
+        System.Data.Entity.DbSet<VoterElection> VoterElections { get; set; } // VoterElection
+        System.Data.Entity.DbSet<VoterTemporal> VoterTemporals { get; set; } // Voter_Temporal
 
         int SaveChanges();
         System.Threading.Tasks.Task<int> SaveChangesAsync();
@@ -50,6 +56,18 @@ namespace Voter.DAL.EF6
         System.Data.Entity.DbSet Set(System.Type entityType);
         System.Data.Entity.DbSet<TEntity> Set<TEntity>() where TEntity : class;
         string ToString();
+
+        // Stored Procedures
+        ImportVoterCsvReturnModel ImportVoterCsv(string fileName);
+        System.Threading.Tasks.Task<ImportVoterCsvReturnModel> ImportVoterCsvAsync(string fileName);
+
+        int ParseRawToElections(System.DateTime? sourceDate);
+        // ParseRawToElectionsAsync cannot be created due to having out parameters, or is relying on the procedure result (int)
+
+        System.Collections.Generic.List<ProcessVoterDataImportReturnModel> ProcessVoterDataImport();
+        System.Collections.Generic.List<ProcessVoterDataImportReturnModel> ProcessVoterDataImport(out int procResult);
+        System.Threading.Tasks.Task<System.Collections.Generic.List<ProcessVoterDataImportReturnModel>> ProcessVoterDataImportAsync();
+
     }
 
     #endregion
@@ -59,6 +77,12 @@ namespace Voter.DAL.EF6
     [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.37.2.0")]
     public class VoterDbContext : System.Data.Entity.DbContext, IVoterDbContext
     {
+        public System.Data.Entity.DbSet<DataImport> DataImports { get; set; } // DataImports
+        public System.Data.Entity.DbSet<Election> Elections { get; set; } // Election
+        public System.Data.Entity.DbSet<EmployeeHistory> EmployeeHistories { get; set; } // EmployeeHistory
+        public System.Data.Entity.DbSet<Voter> Voters { get; set; } // Voter
+        public System.Data.Entity.DbSet<VoterElection> VoterElections { get; set; } // VoterElection
+        public System.Data.Entity.DbSet<VoterTemporal> VoterTemporals { get; set; } // Voter_Temporal
 
         static VoterDbContext()
         {
@@ -108,12 +132,125 @@ namespace Voter.DAL.EF6
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Configurations.Add(new DataImportConfiguration());
+            modelBuilder.Configurations.Add(new ElectionConfiguration());
+            modelBuilder.Configurations.Add(new EmployeeHistoryConfiguration());
+            modelBuilder.Configurations.Add(new VoterConfiguration());
+            modelBuilder.Configurations.Add(new VoterElectionConfiguration());
+            modelBuilder.Configurations.Add(new VoterTemporalConfiguration());
         }
 
         public static System.Data.Entity.DbModelBuilder CreateModel(System.Data.Entity.DbModelBuilder modelBuilder, string schema)
         {
+            modelBuilder.Configurations.Add(new DataImportConfiguration(schema));
+            modelBuilder.Configurations.Add(new ElectionConfiguration(schema));
+            modelBuilder.Configurations.Add(new EmployeeHistoryConfiguration(schema));
+            modelBuilder.Configurations.Add(new VoterConfiguration(schema));
+            modelBuilder.Configurations.Add(new VoterElectionConfiguration(schema));
+            modelBuilder.Configurations.Add(new VoterTemporalConfiguration(schema));
             return modelBuilder;
         }
+
+        // Stored Procedures
+        public ImportVoterCsvReturnModel ImportVoterCsv(string fileName)
+        {
+            var fileNameParam = new System.Data.SqlClient.SqlParameter { ParameterName = "@FileName", SqlDbType = System.Data.SqlDbType.VarChar, Direction = System.Data.ParameterDirection.Input, Value = fileName, Size = 250 };
+            if (fileNameParam.Value == null)
+                fileNameParam.Value = System.DBNull.Value;
+
+
+            var procResultData = new ImportVoterCsvReturnModel();
+            var cmd = Database.Connection.CreateCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.CommandText = "[dbo].[ImportVoterCSV]";
+            cmd.Parameters.Add(fileNameParam);
+
+            try
+            {
+                System.Data.Entity.Infrastructure.Interception.DbInterception.Dispatch.Connection.Open(Database.Connection, new System.Data.Entity.Infrastructure.Interception.DbInterceptionContext());
+                var reader = cmd.ExecuteReader();
+                var objectContext = ((System.Data.Entity.Infrastructure.IObjectContextAdapter) this).ObjectContext;
+
+                procResultData.ResultSet1 = objectContext.Translate<ImportVoterCsvReturnModel.ResultSetModel1>(reader).ToList();
+                reader.NextResult();
+
+                procResultData.ResultSet2 = objectContext.Translate<ImportVoterCsvReturnModel.ResultSetModel2>(reader).ToList();
+                reader.Close();
+
+            }
+            finally
+            {
+                System.Data.Entity.Infrastructure.Interception.DbInterception.Dispatch.Connection.Close(Database.Connection, new System.Data.Entity.Infrastructure.Interception.DbInterceptionContext());
+            }
+            return procResultData;
+        }
+
+        public async System.Threading.Tasks.Task<ImportVoterCsvReturnModel> ImportVoterCsvAsync(string fileName)
+        {
+            var fileNameParam = new System.Data.SqlClient.SqlParameter { ParameterName = "@FileName", SqlDbType = System.Data.SqlDbType.VarChar, Direction = System.Data.ParameterDirection.Input, Value = fileName, Size = 250 };
+            if (fileNameParam.Value == null)
+                fileNameParam.Value = System.DBNull.Value;
+
+
+            var procResultData = new ImportVoterCsvReturnModel();
+            var cmd = Database.Connection.CreateCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.CommandText = "[dbo].[ImportVoterCSV]";
+            cmd.Parameters.Add(fileNameParam);
+
+            try
+            {
+                await System.Data.Entity.Infrastructure.Interception.DbInterception.Dispatch.Connection.OpenAsync(Database.Connection, new System.Data.Entity.Infrastructure.Interception.DbInterceptionContext(), new System.Threading.CancellationToken()).ConfigureAwait(false);
+                var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+                var objectContext = ((System.Data.Entity.Infrastructure.IObjectContextAdapter) this).ObjectContext;
+
+                procResultData.ResultSet1 = objectContext.Translate<ImportVoterCsvReturnModel.ResultSetModel1>(reader).ToList();
+                await reader.NextResultAsync().ConfigureAwait(false);
+
+                procResultData.ResultSet2 = objectContext.Translate<ImportVoterCsvReturnModel.ResultSetModel2>(reader).ToList();
+            }
+            finally
+            {
+                System.Data.Entity.Infrastructure.Interception.DbInterception.Dispatch.Connection.Close(Database.Connection, new System.Data.Entity.Infrastructure.Interception.DbInterceptionContext());
+            }
+            return procResultData;
+        }
+
+        public int ParseRawToElections(System.DateTime? sourceDate)
+        {
+            var sourceDateParam = new System.Data.SqlClient.SqlParameter { ParameterName = "@SourceDate", SqlDbType = System.Data.SqlDbType.DateTime2, Direction = System.Data.ParameterDirection.Input, Value = sourceDate.GetValueOrDefault() };
+            if (!sourceDate.HasValue)
+                sourceDateParam.Value = System.DBNull.Value;
+
+            var procResultParam = new System.Data.SqlClient.SqlParameter { ParameterName = "@procResult", SqlDbType = System.Data.SqlDbType.Int, Direction = System.Data.ParameterDirection.Output };
+
+            Database.ExecuteSqlCommand(System.Data.Entity.TransactionalBehavior.DoNotEnsureTransaction, "EXEC @procResult = [dbo].[ParseRawToElections] @SourceDate", sourceDateParam, procResultParam);
+
+            return (int) procResultParam.Value;
+        }
+
+        public System.Collections.Generic.List<ProcessVoterDataImportReturnModel> ProcessVoterDataImport()
+        {
+            int procResult;
+            return ProcessVoterDataImport(out procResult);
+        }
+
+        public System.Collections.Generic.List<ProcessVoterDataImportReturnModel> ProcessVoterDataImport(out int procResult)
+        {
+            var procResultParam = new System.Data.SqlClient.SqlParameter { ParameterName = "@procResult", SqlDbType = System.Data.SqlDbType.Int, Direction = System.Data.ParameterDirection.Output };
+            var procResultData = Database.SqlQuery<ProcessVoterDataImportReturnModel>("EXEC @procResult = [dbo].[ProcessVoterDataImport] ", procResultParam).ToList();
+
+            procResult = (int) procResultParam.Value;
+            return procResultData;
+        }
+
+        public async System.Threading.Tasks.Task<System.Collections.Generic.List<ProcessVoterDataImportReturnModel>> ProcessVoterDataImportAsync()
+        {
+            var procResultData = await Database.SqlQuery<ProcessVoterDataImportReturnModel>("EXEC [dbo].[ProcessVoterDataImport] ").ToListAsync();
+
+            return procResultData;
+        }
+
     }
     #endregion
 
@@ -134,6 +271,12 @@ namespace Voter.DAL.EF6
     [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.37.2.0")]
     public class FakeVoterDbContext : IVoterDbContext
     {
+        public System.Data.Entity.DbSet<DataImport> DataImports { get; set; }
+        public System.Data.Entity.DbSet<Election> Elections { get; set; }
+        public System.Data.Entity.DbSet<EmployeeHistory> EmployeeHistories { get; set; }
+        public System.Data.Entity.DbSet<Voter> Voters { get; set; }
+        public System.Data.Entity.DbSet<VoterElection> VoterElections { get; set; }
+        public System.Data.Entity.DbSet<VoterTemporal> VoterTemporals { get; set; }
 
         public FakeVoterDbContext()
         {
@@ -141,6 +284,12 @@ namespace Voter.DAL.EF6
             _configuration = null;
             _database = null;
 
+            DataImports = new FakeDbSet<DataImport>("Id");
+            Elections = new FakeDbSet<Election>("ElectionId");
+            EmployeeHistories = new FakeDbSet<EmployeeHistory>("VoterId", "ValidFrom", "ValidTo");
+            Voters = new FakeDbSet<Voter>("VoterId");
+            VoterElections = new FakeDbSet<VoterElection>("VoterId");
+            VoterTemporals = new FakeDbSet<VoterTemporal>("VoterId", "ValidFrom", "ValidTo");
         }
 
         public int SaveChangesCount { get; private set; }
@@ -200,6 +349,52 @@ namespace Voter.DAL.EF6
         public override string ToString()
         {
             throw new System.NotImplementedException();
+        }
+
+
+        // Stored Procedures
+        public ImportVoterCsvReturnModel ImportVoterCsv(string fileName)
+        {
+            int procResult;
+            return ImportVoterCsv(fileName, out procResult);
+        }
+
+        public ImportVoterCsvReturnModel ImportVoterCsv(string fileName, out int procResult)
+        {
+
+            procResult = 0;
+            return new ImportVoterCsvReturnModel();
+        }
+
+        public System.Threading.Tasks.Task<ImportVoterCsvReturnModel> ImportVoterCsvAsync(string fileName)
+        {
+            int procResult;
+            return System.Threading.Tasks.Task.FromResult(ImportVoterCsv(fileName, out procResult));
+        }
+
+        public int ParseRawToElections(System.DateTime? sourceDate)
+        {
+
+            return 0;
+        }
+
+        public System.Collections.Generic.List<ProcessVoterDataImportReturnModel> ProcessVoterDataImport()
+        {
+            int procResult;
+            return ProcessVoterDataImport(out procResult);
+        }
+
+        public System.Collections.Generic.List<ProcessVoterDataImportReturnModel> ProcessVoterDataImport(out int procResult)
+        {
+
+            procResult = 0;
+            return new System.Collections.Generic.List<ProcessVoterDataImportReturnModel>();
+        }
+
+        public System.Threading.Tasks.Task<System.Collections.Generic.List<ProcessVoterDataImportReturnModel>> ProcessVoterDataImportAsync()
+        {
+            int procResult;
+            return System.Threading.Tasks.Task.FromResult(ProcessVoterDataImport(out procResult));
         }
 
     }
@@ -469,55 +664,441 @@ namespace Voter.DAL.EF6
 
     #region POCO classes
 
-    // The table 'raw_file3' is not usable by entity framework because it
-    // does not have a primary key. It is listed here for completeness.
-    // raw_file3
+    // DataImports
     [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.37.2.0")]
-    public class RawFile3
+    public class DataImport
     {
+        public int Id { get; set; } // Id (Primary key)
+        public string FileName { get; set; } // FileName (length: 200)
+        public System.DateTime FileDate { get; set; } // FileDate
+        public System.DateTime ImportDate { get; set; } // ImportDate
+    }
+
+    // Election
+    [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.37.2.0")]
+    public class Election
+    {
+        public int ElectionId { get; set; } // ElectionId (Primary key)
+        public int VoteYear { get; set; } // VoteYear
+        public string VoteElection { get; set; } // VoteElection (length: 10)
+        public string Note { get; set; } // Note
+        public System.DateTime Ceated { get; set; } // Ceated
+
+        // Reverse navigation
+
+        /// <summary>
+        /// Child VoterElections where [VoterElection].[ElectionId] point to this entity (FK_VoterElection_Election)
+        /// </summary>
+        public virtual System.Collections.Generic.ICollection<VoterElection> VoterElections { get; set; } // VoterElection.FK_VoterElection_Election
+
+        public Election()
+        {
+            VoterElections = new System.Collections.Generic.List<VoterElection>();
+        }
+    }
+
+    // EmployeeHistory
+    [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.37.2.0")]
+    public class EmployeeHistory
+    {
+        public int VoterId { get; set; } // VoterId (Primary key)
         public string Un { get; set; } // UN
         public string Party { get; set; } // PARTY
         public string D47P { get; set; } // D/P
-        public string LastName { get; set; } // LAST NAME
-        public string FirstName { get; set; } // FIRST NAME
-        public string MiddleName { get; set; } // MIDDLE NAME
-        public string SuffixName { get; set; } // SUFFIX NAME
-        public string Ascension35 { get; set; } // ASCENSION #
-        public string RegDate { get; set; } // REG DATE
-        public string OrgRegDate { get; set; } // ORG REG DATE
-        public string DistDate { get; set; } // DIST DATE
-        public string ResidenceAddress { get; set; } // RESIDENCE ADDRESS
-        public string ResidenceCity { get; set; } // RESIDENCE CITY
-        public string ResidenceZip { get; set; } // RESIDENCE ZIP
-        public string MailingAddress1 { get; set; } // MAILING ADDRESS1
-        public string MailingAddress2 { get; set; } // MAILING ADDRESS2
-        public string MailingAddress3 { get; set; } // MAILING ADDRESS3
-        public string MailingCity { get; set; } // MAILING CITY
-        public string MailingState { get; set; } // MAILING STATE
-        public string MailingZip { get; set; } // MAILING ZIP
-        public string MailingCountry { get; set; } // MAILING COUNTRY
+        public string LastName { get; set; } // LastName
+        public string FirstName { get; set; } // FirstName
+        public string MiddleName { get; set; } // MiddleName
+        public string Suffix { get; set; } // Suffix
+        public string RegDate { get; set; } // RegDate
+        public string OrgRegDate { get; set; } // OrgRegDate
+        public string DistDate { get; set; } // DistDate
+        public string Address { get; set; } // Address
+        public string City { get; set; } // City
+        public string Zip { get; set; } // Zip
+        public string MailingAddr1 { get; set; } // MailingAddr1
+        public string MailingADdr2 { get; set; } // MailingADdr2
+        public string MailingAddr3 { get; set; } // MailingAddr3
+        public string MailingCity { get; set; } // MailingCity
+        public string MailingState { get; set; } // MailingState
+        public string MailingZip { get; set; } // MailingZip
+        public string MailingCountry { get; set; } // MailingCountry
+        public string Gender { get; set; } // Gender
+        public System.DateTime ValidFrom { get; set; } // ValidFrom (Primary key)
+        public System.DateTime ValidTo { get; set; } // ValidTo (Primary key)
+    }
+
+    // The table 'RawStateVoterImport' is not usable by entity framework because it
+    // does not have a primary key. It is listed here for completeness.
+    // RawStateVoterImport
+    [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.37.2.0")]
+    public class RawStateVoterImport
+    {
+        public string Un { get; set; } // UN (length: 1)
+        public string Party { get; set; } // PARTY (length: 1)
+        public string D47P { get; set; } // D/P (length: 6)
+        public string LastName { get; set; } // LAST NAME (length: 50)
+        public string FirstName { get; set; } // FIRST NAME (length: 50)
+        public string MiddleName { get; set; } // MIDDLE NAME (length: 50)
+        public string SuffixName { get; set; } // SUFFIX NAME (length: 10)
+        public int? Ascension35 { get; set; } // ASCENSION #
+        public System.DateTime? RegDate { get; set; } // REG DATE
+        public System.DateTime? OrgRegDate { get; set; } // ORG REG DATE
+        public System.DateTime? DistDate { get; set; } // DIST DATE
+        public string ResidenceAddress { get; set; } // RESIDENCE ADDRESS (length: 100)
+        public string ResidenceCity { get; set; } // RESIDENCE CITY (length: 100)
+        public string ResidenceZip { get; set; } // RESIDENCE ZIP (length: 100)
+        public string MailingAddress1 { get; set; } // MAILING ADDRESS1 (length: 100)
+        public string MailingAddress2 { get; set; } // MAILING ADDRESS2 (length: 100)
+        public string MailingAddress3 { get; set; } // MAILING ADDRESS3 (length: 100)
+        public string MailingCity { get; set; } // MAILING CITY (length: 100)
+        public string MailingState { get; set; } // MAILING STATE (length: 100)
+        public string MailingZip { get; set; } // MAILING ZIP (length: 10)
+        public string MailingCountry { get; set; } // MAILING COUNTRY (length: 200)
         public string Gender { get; set; } // GENDER
-        public string Vh1 { get; set; } // VH1
-        public string Vh2 { get; set; } // VH2
-        public string Vh3 { get; set; } // VH3
-        public string Vh4 { get; set; } // VH4
-        public string Vh5 { get; set; } // VH5
-        public string Vh6 { get; set; } // VH6
-        public string Vh7 { get; set; } // VH7
-        public string Vh8 { get; set; } // VH8
-        public string Vh9 { get; set; } // VH9
-        public string Vh10 { get; set; } // VH10
-        public string Vh11 { get; set; } // VH11
-        public string Vh12 { get; set; } // VH12
-        public string Vh13 { get; set; } // VH13
-        public string Vh14 { get; set; } // VH14
-        public string Vh15 { get; set; } // VH15
-        public string Vh16 { get; set; } // VH16
+        public string Vh1 { get; set; } // VH1 (length: 10)
+        public string Vh2 { get; set; } // VH2 (length: 10)
+        public string Vh3 { get; set; } // VH3 (length: 10)
+        public string Vh4 { get; set; } // VH4 (length: 10)
+        public string Vh5 { get; set; } // VH5 (length: 10)
+        public string Vh6 { get; set; } // VH6 (length: 10)
+        public string Vh7 { get; set; } // VH7 (length: 10)
+        public string Vh8 { get; set; } // VH8 (length: 10)
+        public string Vh9 { get; set; } // VH9 (length: 10)
+        public string Vh10 { get; set; } // VH10 (length: 10)
+        public string Vh11 { get; set; } // VH11 (length: 10)
+        public string Vh12 { get; set; } // VH12 (length: 10)
+        public string Vh13 { get; set; } // VH13 (length: 10)
+        public string Vh14 { get; set; } // VH14 (length: 10)
+        public string Vh15 { get; set; } // VH15 (length: 10)
+        public string Vh16 { get; set; } // VH16 (length: 10)
+    }
+
+    // The table 'RawVotes' is not usable by entity framework because it
+    // does not have a primary key. It is listed here for completeness.
+    // RawVotes
+    [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.37.2.0")]
+    public class RawVote
+    {
+        public int? VoterId { get; set; } // VoterId
+        public string Election { get; set; } // Election (length: 10)
+        public int? VoteYear { get; set; } // VoteYear
+        public string VoteElection { get; set; } // VoteElection (length: 4)
+        public string VoteMethod { get; set; } // VoteMethod (length: 2)
+    }
+
+    // Voter
+    [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.37.2.0")]
+    public class Voter
+    {
+        public int VoterId { get; set; } // VoterId (Primary key)
+        public string Un { get; set; } // UN
+        public string Party { get; set; } // PARTY
+        public string D47P { get; set; } // D/P
+        public string LastName { get; set; } // LastName
+        public string FirstName { get; set; } // FirstName
+        public string MiddleName { get; set; } // MiddleName
+        public string Suffix { get; set; } // Suffix
+        public string RegDate { get; set; } // RegDate
+        public string OrgRegDate { get; set; } // OrgRegDate
+        public string DistDate { get; set; } // DistDate
+        public string Address { get; set; } // Address
+        public string City { get; set; } // City
+        public string Zip { get; set; } // Zip
+        public string MailingAddr1 { get; set; } // MailingAddr1
+        public string MailingADdr2 { get; set; } // MailingADdr2
+        public string MailingAddr3 { get; set; } // MailingAddr3
+        public string MailingCity { get; set; } // MailingCity
+        public string MailingState { get; set; } // MailingState
+        public string MailingZip { get; set; } // MailingZip
+        public string MailingCountry { get; set; } // MailingCountry
+        public string Gender { get; set; } // Gender
+        public System.DateTime ValidFrom { get; set; } // ValidFrom
+        public System.DateTime ValidTo { get; set; } // ValidTo
+
+        // Reverse navigation
+
+        /// <summary>
+        /// Parent (One-to-One) Voter pointed by [VoterElection].[VoterId] (FK_VoterElection_Voter)
+        /// </summary>
+        public virtual VoterElection VoterElection { get; set; } // VoterElection.FK_VoterElection_Voter
+    }
+
+    // VoterElection
+    [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.37.2.0")]
+    public class VoterElection
+    {
+        public int VoterId { get; set; } // VoterId (Primary key)
+        public int ElectionId { get; set; } // ElectionId
+        public string Vote { get; set; } // Vote (length: 10)
+
+        // Foreign keys
+
+        /// <summary>
+        /// Parent Election pointed by [VoterElection].([ElectionId]) (FK_VoterElection_Election)
+        /// </summary>
+        public virtual Election Election { get; set; } // FK_VoterElection_Election
+
+        /// <summary>
+        /// Parent Voter pointed by [VoterElection].([VoterId]) (FK_VoterElection_Voter)
+        /// </summary>
+        public virtual Voter Voter { get; set; } // FK_VoterElection_Voter
+    }
+
+    // Voter_Temporal
+    [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.37.2.0")]
+    public class VoterTemporal
+    {
+        public int VoterId { get; set; } // VoterId (Primary key)
+        public string Un { get; set; } // UN
+        public string Party { get; set; } // PARTY
+        public string D47P { get; set; } // D/P
+        public string LastName { get; set; } // LastName
+        public string FirstName { get; set; } // FirstName
+        public string MiddleName { get; set; } // MiddleName
+        public string Suffix { get; set; } // Suffix
+        public string RegDate { get; set; } // RegDate
+        public string OrgRegDate { get; set; } // OrgRegDate
+        public string DistDate { get; set; } // DistDate
+        public string Address { get; set; } // Address
+        public string City { get; set; } // City
+        public string Zip { get; set; } // Zip
+        public string MailingAddr1 { get; set; } // MailingAddr1
+        public string MailingADdr2 { get; set; } // MailingADdr2
+        public string MailingAddr3 { get; set; } // MailingAddr3
+        public string MailingCity { get; set; } // MailingCity
+        public string MailingState { get; set; } // MailingState
+        public string MailingZip { get; set; } // MailingZip
+        public string MailingCountry { get; set; } // MailingCountry
+        public string Gender { get; set; } // Gender
+        public System.DateTime ValidFrom { get; set; } // ValidFrom (Primary key)
+        public System.DateTime ValidTo { get; set; } // ValidTo (Primary key)
     }
 
     #endregion
 
     #region POCO Configuration
+
+    // DataImports
+    [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.37.2.0")]
+    public class DataImportConfiguration : System.Data.Entity.ModelConfiguration.EntityTypeConfiguration<DataImport>
+    {
+        public DataImportConfiguration()
+            : this("dbo")
+        {
+        }
+
+        public DataImportConfiguration(string schema)
+        {
+            ToTable("DataImports", schema);
+            HasKey(x => x.Id);
+
+            Property(x => x.Id).HasColumnName(@"Id").HasColumnType("int").IsRequired().HasDatabaseGeneratedOption(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.None);
+            Property(x => x.FileName).HasColumnName(@"FileName").HasColumnType("varchar").IsRequired().IsUnicode(false).HasMaxLength(200);
+            Property(x => x.FileDate).HasColumnName(@"FileDate").HasColumnType("date").IsRequired();
+            Property(x => x.ImportDate).HasColumnName(@"ImportDate").HasColumnType("datetime").IsRequired();
+        }
+    }
+
+    // Election
+    [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.37.2.0")]
+    public class ElectionConfiguration : System.Data.Entity.ModelConfiguration.EntityTypeConfiguration<Election>
+    {
+        public ElectionConfiguration()
+            : this("dbo")
+        {
+        }
+
+        public ElectionConfiguration(string schema)
+        {
+            ToTable("Election", schema);
+            HasKey(x => x.ElectionId);
+
+            Property(x => x.ElectionId).HasColumnName(@"ElectionId").HasColumnType("int").IsRequired().HasDatabaseGeneratedOption(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.Identity);
+            Property(x => x.VoteYear).HasColumnName(@"VoteYear").HasColumnType("int").IsRequired();
+            Property(x => x.VoteElection).HasColumnName(@"VoteElection").HasColumnType("nchar").IsRequired().IsFixedLength().HasMaxLength(10);
+            Property(x => x.Note).HasColumnName(@"Note").HasColumnType("varchar(max)").IsOptional().IsUnicode(false);
+            Property(x => x.Ceated).HasColumnName(@"Ceated").HasColumnType("datetime2").IsRequired();
+        }
+    }
+
+    // EmployeeHistory
+    [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.37.2.0")]
+    public class EmployeeHistoryConfiguration : System.Data.Entity.ModelConfiguration.EntityTypeConfiguration<EmployeeHistory>
+    {
+        public EmployeeHistoryConfiguration()
+            : this("dbo")
+        {
+        }
+
+        public EmployeeHistoryConfiguration(string schema)
+        {
+            ToTable("EmployeeHistory", schema);
+            HasKey(x => new { x.VoterId, x.ValidFrom, x.ValidTo });
+
+            Property(x => x.VoterId).HasColumnName(@"VoterId").HasColumnType("int").IsRequired().HasDatabaseGeneratedOption(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.None);
+            Property(x => x.Un).HasColumnName(@"UN").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.Party).HasColumnName(@"PARTY").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.D47P).HasColumnName(@"D/P").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.LastName).HasColumnName(@"LastName").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.FirstName).HasColumnName(@"FirstName").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.MiddleName).HasColumnName(@"MiddleName").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.Suffix).HasColumnName(@"Suffix").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.RegDate).HasColumnName(@"RegDate").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.OrgRegDate).HasColumnName(@"OrgRegDate").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.DistDate).HasColumnName(@"DistDate").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.Address).HasColumnName(@"Address").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.City).HasColumnName(@"City").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.Zip).HasColumnName(@"Zip").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.MailingAddr1).HasColumnName(@"MailingAddr1").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.MailingADdr2).HasColumnName(@"MailingADdr2").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.MailingAddr3).HasColumnName(@"MailingAddr3").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.MailingCity).HasColumnName(@"MailingCity").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.MailingState).HasColumnName(@"MailingState").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.MailingZip).HasColumnName(@"MailingZip").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.MailingCountry).HasColumnName(@"MailingCountry").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.Gender).HasColumnName(@"Gender").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.ValidFrom).HasColumnName(@"ValidFrom").HasColumnType("datetime2").IsRequired().HasDatabaseGeneratedOption(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.None);
+            Property(x => x.ValidTo).HasColumnName(@"ValidTo").HasColumnType("datetime2").IsRequired().HasDatabaseGeneratedOption(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.None);
+        }
+    }
+
+    // Voter
+    [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.37.2.0")]
+    public class VoterConfiguration : System.Data.Entity.ModelConfiguration.EntityTypeConfiguration<Voter>
+    {
+        public VoterConfiguration()
+            : this("dbo")
+        {
+        }
+
+        public VoterConfiguration(string schema)
+        {
+            ToTable("Voter", schema);
+            HasKey(x => x.VoterId);
+
+            Property(x => x.VoterId).HasColumnName(@"VoterId").HasColumnType("int").IsRequired().HasDatabaseGeneratedOption(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.None);
+            Property(x => x.Un).HasColumnName(@"UN").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.Party).HasColumnName(@"PARTY").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.D47P).HasColumnName(@"D/P").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.LastName).HasColumnName(@"LastName").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.FirstName).HasColumnName(@"FirstName").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.MiddleName).HasColumnName(@"MiddleName").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.Suffix).HasColumnName(@"Suffix").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.RegDate).HasColumnName(@"RegDate").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.OrgRegDate).HasColumnName(@"OrgRegDate").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.DistDate).HasColumnName(@"DistDate").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.Address).HasColumnName(@"Address").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.City).HasColumnName(@"City").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.Zip).HasColumnName(@"Zip").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.MailingAddr1).HasColumnName(@"MailingAddr1").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.MailingADdr2).HasColumnName(@"MailingADdr2").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.MailingAddr3).HasColumnName(@"MailingAddr3").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.MailingCity).HasColumnName(@"MailingCity").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.MailingState).HasColumnName(@"MailingState").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.MailingZip).HasColumnName(@"MailingZip").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.MailingCountry).HasColumnName(@"MailingCountry").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.Gender).HasColumnName(@"Gender").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.ValidFrom).HasColumnName(@"ValidFrom").HasColumnType("datetime2").IsRequired().HasDatabaseGeneratedOption(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.Identity);
+            Property(x => x.ValidTo).HasColumnName(@"ValidTo").HasColumnType("datetime2").IsRequired().HasDatabaseGeneratedOption(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.Identity);
+        }
+    }
+
+    // VoterElection
+    [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.37.2.0")]
+    public class VoterElectionConfiguration : System.Data.Entity.ModelConfiguration.EntityTypeConfiguration<VoterElection>
+    {
+        public VoterElectionConfiguration()
+            : this("dbo")
+        {
+        }
+
+        public VoterElectionConfiguration(string schema)
+        {
+            ToTable("VoterElection", schema);
+            HasKey(x => x.VoterId);
+
+            Property(x => x.VoterId).HasColumnName(@"VoterId").HasColumnType("int").IsRequired().HasDatabaseGeneratedOption(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.None);
+            Property(x => x.ElectionId).HasColumnName(@"ElectionId").HasColumnType("int").IsRequired();
+            Property(x => x.Vote).HasColumnName(@"Vote").HasColumnType("char").IsRequired().IsFixedLength().IsUnicode(false).HasMaxLength(10);
+
+            // Foreign keys
+            HasRequired(a => a.Election).WithMany(b => b.VoterElections).HasForeignKey(c => c.ElectionId).WillCascadeOnDelete(false); // FK_VoterElection_Election
+            HasRequired(a => a.Voter).WithOptional(b => b.VoterElection).WillCascadeOnDelete(false); // FK_VoterElection_Voter
+        }
+    }
+
+    // Voter_Temporal
+    [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.37.2.0")]
+    public class VoterTemporalConfiguration : System.Data.Entity.ModelConfiguration.EntityTypeConfiguration<VoterTemporal>
+    {
+        public VoterTemporalConfiguration()
+            : this("dbo")
+        {
+        }
+
+        public VoterTemporalConfiguration(string schema)
+        {
+            ToTable("Voter_Temporal", schema);
+            HasKey(x => new { x.VoterId, x.ValidFrom, x.ValidTo });
+
+            Property(x => x.VoterId).HasColumnName(@"VoterId").HasColumnType("int").IsRequired().HasDatabaseGeneratedOption(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.None);
+            Property(x => x.Un).HasColumnName(@"UN").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.Party).HasColumnName(@"PARTY").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.D47P).HasColumnName(@"D/P").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.LastName).HasColumnName(@"LastName").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.FirstName).HasColumnName(@"FirstName").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.MiddleName).HasColumnName(@"MiddleName").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.Suffix).HasColumnName(@"Suffix").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.RegDate).HasColumnName(@"RegDate").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.OrgRegDate).HasColumnName(@"OrgRegDate").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.DistDate).HasColumnName(@"DistDate").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.Address).HasColumnName(@"Address").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.City).HasColumnName(@"City").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.Zip).HasColumnName(@"Zip").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.MailingAddr1).HasColumnName(@"MailingAddr1").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.MailingADdr2).HasColumnName(@"MailingADdr2").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.MailingAddr3).HasColumnName(@"MailingAddr3").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.MailingCity).HasColumnName(@"MailingCity").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.MailingState).HasColumnName(@"MailingState").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.MailingZip).HasColumnName(@"MailingZip").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.MailingCountry).HasColumnName(@"MailingCountry").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.Gender).HasColumnName(@"Gender").HasColumnType("nvarchar(max)").IsOptional();
+            Property(x => x.ValidFrom).HasColumnName(@"ValidFrom").HasColumnType("datetime2").IsRequired().HasDatabaseGeneratedOption(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.None);
+            Property(x => x.ValidTo).HasColumnName(@"ValidTo").HasColumnType("datetime2").IsRequired().HasDatabaseGeneratedOption(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.None);
+        }
+    }
+
+    #endregion
+
+    #region Stored procedure return models
+
+    [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.37.2.0")]
+    public class ImportVoterCsvReturnModel
+    {
+        public class ResultSetModel1
+        {
+            public System.String Column1 { get; set; }
+        }
+        public System.Collections.Generic.List<ResultSetModel1> ResultSet1;
+
+        public class ResultSetModel2
+        {
+            public System.Int32? ErrorNumber { get; set; }
+            public System.Int32? ErrorSeverity { get; set; }
+            public System.Int32? ErrorState { get; set; }
+            public System.String ErrorProcedure { get; set; }
+            public System.Int32? ErrorLine { get; set; }
+            public System.String ErrorMessage { get; set; }
+        }
+        public System.Collections.Generic.List<ResultSetModel2> ResultSet2;
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.37.2.0")]
+    public class ProcessVoterDataImportReturnModel
+    {
+        public System.String Column1 { get; set; }
+    }
 
     #endregion
 

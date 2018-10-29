@@ -4,8 +4,22 @@
 
 *******************************************************************************/
 CREATE PROCEDURE [dbo].[LogDataImport]
-    @param1 int = 0,
-    @param2 int
+    @FileName VARCHAR(250) = 'Missing',
+    @FileDate DATETIME,
+    @Note VARCHAR(100) = 'Missing'
 AS
-    SELECT @param1, @param2
+    INSERT INTO dbo.DataImports
+    (
+        FileName,
+        FileDate,
+        ImportDate,
+        Note
+    )
+    VALUES
+    (
+        @FileName, -- FileName - varchar
+        @FileDate, -- FileDate - date
+        GETDATE(), -- ImportDate - datetime
+        @Note
+    )
 RETURN 0
