@@ -5,6 +5,9 @@ The secondary purpose is self improvement and practice.
 * Learning new MS SQL and TSQL features 
 * More practice using SSDT database project for database development.  (I normally SSMS)
 
+# Domain
+Voter data is available to anyone fromthe the ALaska Division of Elections.  The data is avaiable as a CSV file on CD.  There is a small user fee of $21.
+
 # Technical 
 
 ## Data
