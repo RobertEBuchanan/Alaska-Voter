@@ -1,7 +1,7 @@
 # Alaska-Voter
 The purpose of this project is to make working with voter data easer and more efficient. Manually loading and cleaning the voter data is a pain.  
 
-# Techninology
+# Technical Plans
 - Database 
   - SSDT
   - SQL 2017+
@@ -20,7 +20,7 @@ The purpose of this project is to make working with voter data easer and more ef
 
 # TODO
 - Frame out solution
-  - Data Ingestion
+  - Data Ingestion                   
   - DB Schema / Setup
     - tables
         - processing schema 
