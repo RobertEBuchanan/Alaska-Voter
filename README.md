@@ -1,16 +1,28 @@
 # Alaska-Voter
 The primary purpose of this project is to make working with voter data easer and more efficient. Manually loading and cleaning voter data is a pain. I have time at the moment to build automation.
 
-The secondary purpose is self improvement and practice.
+The secondary purpose is self improvement and practice.  
 * Learning new MS SQL and TSQL features 
 * More practice using SSDT database project for database development.  (I normally SSMS)
 
-# Domain
-Voter data is available to anyone fromthe the ALaska Division of Elections.  The data is avaiable as a CSV file on CD.  There is a small user fee of $21.
+# Domain - Background
+Voter data is available to anyone from the the Alaska Division of Elections.  The data is avaiable as a CSV extract on CD.  There is a nominal user fee of $21.  
 
-# Technical 
+# Technical Details
+Overview of... 
 
-## Data
+## Tools
+I am currently using VS2017.
+
+* SSDT
+* EF6
+* Windows Forms
+* Reverse Poco Generator
+
+### Solution
+
+
+#### Data
 The backend is MS SQL 2017+.  
 
 For development, I am currently using the latest CTP of 2019.  
@@ -20,6 +32,9 @@ For development, I am currently using the latest CTP of 2019.
 I am building the database with a database project in SSDT.
 * Lower friction deployments. (Perhaps CI?)
 * Project helps to organise SLQ code.
+
+#### Voter Import/Update
+
 
 # Plans
 - Database 
