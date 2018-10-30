@@ -16,6 +16,10 @@ AS
             EXEC dbo.ImportVoterCSV @FileName 
 
             EXEC dbo.ParseRawToElections @FileDate
+
+            EXEC [dbo].[ParseRawToVoters]
+
+            EXEC [dbo].[ParseRawToVoterElections]
         
             EXEC dbo.LogDataImport @FileName, @FileDate, "Finished Import"
 
