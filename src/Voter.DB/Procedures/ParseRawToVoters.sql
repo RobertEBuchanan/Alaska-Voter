@@ -130,7 +130,7 @@ AS
         ;WITH 
         source_cte as
         (
-	        SELECT --top 1
+	        SELECT 
 		        [VoterId]			= CONVERT(INT,rsvi.[ASCENSION #]),  
 		        [UN]				= rsvi.UN,
 		        [Party]				= rsvi.PARTY,
@@ -159,7 +159,7 @@ AS
         ),
         target_cte as
         (
-	        SELECT --top 1
+	        SELECT 
 		        [VoterId]			 ,	
 		        [UN]				 ,
 		        [Party]				 ,
@@ -227,7 +227,7 @@ AS
 			    [VoterId],[UN],[Party],[District],[Precinct],[LastName],[FirstName],[MiddleName],[Suffix],[RegDate],
 			    [OrgRegDate],[DistDate],[IsPrivate],[Address],[City],[Zip],[MailingAddr1],[MailingADdr2],[MailingAddr3],
 			    [MailingCity],[MailingState],[MailingZip],[MailingCountry],[Gender])
-		    SELECT top 10
+		    SELECT 
 			    CONVERT(INT,rsvi.[ASCENSION #]),
 			    rsvi.UN,
 			    rsvi.PARTY,

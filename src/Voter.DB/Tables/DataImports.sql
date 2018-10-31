@@ -4,5 +4,5 @@
     [FileName] VARCHAR(200) NOT NULL, 
     [FileDate] DATE NOT NULL,
     [ImportDate] DATETIME NOT NULL,
-    [Note] VARCHAR(100) NULL
+    [Note] VARCHAR(max) NULL
 )

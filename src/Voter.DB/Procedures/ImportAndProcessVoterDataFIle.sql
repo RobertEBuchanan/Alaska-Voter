@@ -26,7 +26,11 @@ AS
         END TRY
         BEGIN CATCH
             PRINT 'oops!' 
-            -- STUB Add log entry 
+            
+            DECLARE @msg VARCHAR(100) = --'ERROR: '     + ERROR_MESSAGE() + ' // ' +  
+            'PROCEDURE: ' + ERROR_PROCEDURE()
+            
+            EXEC dbo.LogDataImport @FileName, @FileDate, @msg
             RETURN 1
         END CATCH
 
