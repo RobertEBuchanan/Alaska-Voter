@@ -34,6 +34,9 @@
             this.dtpFileCreated = new System.Windows.Forms.DateTimePicker();
             this.lblExtractFile = new System.Windows.Forms.Label();
             this.lblExtractDate = new System.Windows.Forms.Label();
+            this.pbxProcessing = new System.Windows.Forms.PictureBox();
+            this.dbAccessWorker = new System.ComponentModel.BackgroundWorker();
+            ((System.ComponentModel.ISupportInitialize)(this.pbxProcessing)).BeginInit();
             this.SuspendLayout();
             // 
             // cmdUploadFilePicker
@@ -51,7 +54,7 @@
             // 
             this.txtFilePath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtFilePath.Location = new System.Drawing.Point(84, 28);
+            this.txtFilePath.Location = new System.Drawing.Point(84, 29);
             this.txtFilePath.Name = "txtFilePath";
             this.txtFilePath.Size = new System.Drawing.Size(444, 20);
             this.txtFilePath.TabIndex = 1;
@@ -96,11 +99,32 @@
             this.lblExtractDate.Text = "Extract Date";
             this.lblExtractDate.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
+            // pbxProcessing
+            // 
+            this.pbxProcessing.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pbxProcessing.Image = global::Voter.Admin.UI.WinForms.Properties.Resources.processing_spinner;
+            this.pbxProcessing.InitialImage = null;
+            this.pbxProcessing.Location = new System.Drawing.Point(305, 54);
+            this.pbxProcessing.Name = "pbxProcessing";
+            this.pbxProcessing.Size = new System.Drawing.Size(31, 31);
+            this.pbxProcessing.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pbxProcessing.TabIndex = 6;
+            this.pbxProcessing.TabStop = false;
+            this.pbxProcessing.Visible = false;
+            // 
+            // dbAccessWorker
+            // 
+            this.dbAccessWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.dbAccessWorker_DoWork);
+            this.dbAccessWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.dbAccessWorker_RunWorkerCompleted);
+            // 
             // FileImporter
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(635, 128);
+            this.Controls.Add(this.pbxProcessing);
             this.Controls.Add(this.lblExtractDate);
             this.Controls.Add(this.lblExtractFile);
             this.Controls.Add(this.dtpFileCreated);
@@ -109,6 +133,7 @@
             this.Controls.Add(this.cmdUploadFilePicker);
             this.Name = "FileImporter";
             this.Text = "File Importer";
+            ((System.ComponentModel.ISupportInitialize)(this.pbxProcessing)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -122,6 +147,8 @@
         private System.Windows.Forms.DateTimePicker dtpFileCreated;
         private System.Windows.Forms.Label lblExtractFile;
         private System.Windows.Forms.Label lblExtractDate;
+        private System.Windows.Forms.PictureBox pbxProcessing;
+        private System.ComponentModel.BackgroundWorker dbAccessWorker;
     }
 }
 

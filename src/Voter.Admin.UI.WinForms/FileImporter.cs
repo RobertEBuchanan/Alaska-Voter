@@ -32,10 +32,32 @@ namespace Voter.Admin.UI.WinForms
 
         private void cmdImport_Click(object sender, EventArgs e)
         {
+            SetProcessing(true);
+            dbAccessWorker.RunWorkerAsync();
+        }
+
+        private void ImportVoterData()
+        {
             var extractDate = dtpFileCreated.Value;
             var fileName = txtFilePath.Text;
 
             data.ImportVoterData(fileName, extractDate);
+        }
+
+        private void SetProcessing(bool val)
+        {
+            cmdImport.Enabled = !val;
+            pbxProcessing.Visible = val;
+        }
+
+        private void dbAccessWorker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
+            ImportVoterData();
+        }
+
+        private void dbAccessWorker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
+        {
+            SetProcessing(false);
         }
     }
 }
